@@ -1,0 +1,15 @@
+<% if user_signed_in? %> 
+  <div>Welcome, <%= current_user.username %>!</div> 
+  <%= button_to "Sign out", destroy_user_session_path, method: :delete %> 
+
+  <h2>All Users</h2>
+  <ul>
+    <% User.all.each do |user| %>
+      <li><strong><%= user.username %></strong> - <%= user.email %></li>
+    <% end %>
+  </ul>
+<% else %>
+  <%= button_to "Sign in", user_session_path %> 
+<% end %>
+
+<h1>Home Page</h1>
