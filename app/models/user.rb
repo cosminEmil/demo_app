@@ -5,4 +5,6 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
          
   has_many :todo_lists
+  has_many :shared_lists, dependent: :destroy
+  has_many :shared_todo_lists, through: :shared_lists, source: :todo_list
 end

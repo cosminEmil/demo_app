@@ -1,24 +1,27 @@
 <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="fw-bold">My Todo Lists</h1>
-    <%= link_to 'New Todo List', new_todo_list_path, class: 'btn btn-primary' %>
-  </div>
+  <h1>Your To-Do Lists</h1>
+  <%= link_to 'Create a New To-Do List', new_todo_list_path, class: 'btn btn-primary mb-3' %>
 
   <% if @todo_lists.any? %>
     <ul class="list-group">
-      <% @todo_lists.each do |list| %>
+      <% @todo_lists.each do |todo_list| %>
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div>
-            <h5 class="mb-0"><%= link_to list.title, todo_list_path(list), class: "text-decoration-none text-dark" %></h5>
+          <div class="d-flex align-items-center">
+            <h5 class="mb-0">
+              <%= link_to todo_list.title, todo_list_path(todo_list), class: "text-decoration-none text-dark" %>
+            </h5>
           </div>
           <div>
-            <%= link_to 'Edit', edit_todo_list_path(list), class: 'btn btn-sm btn-warning' %>
-            <%= button_to 'Delete', todo_list_path(list), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
+            <% if todo_list.user == current_user %>
+              <span class="badge bg-success">Owner</span>
+            <% else %>
+              <span class="badge bg-info">Shared with You</span>
+            <% end %>
           </div>
         </li>
       <% end %>
     </ul>
   <% else %>
-    <p class="text-muted">You have no todo lists yet. Start by creating one!</p>
+    <p class="text-muted">You don’t have any to-do lists yet.</p>
   <% end %>
 </div>

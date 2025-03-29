@@ -12,26 +12,96 @@
 
   <% if @todo_list.tasks.any? %>
     <ul class="list-group">
-      <% @todo_list.tasks.each do |task| %>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
+    <% @todo_list.tasks.each do |task| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <% if @todo_list.shared_lists.exists?(user_id: current_user.id, permission_level: true) || @todo_list.user == current_user %>
             <%= form_with url: toggle_status_todo_list_task_path(@todo_list, task), method: :patch, remote: true do |f| %>
               <%= f.check_box :completed, checked: task.completed, class: "form-check-input me-2", onchange: "this.form.submit();" %>
             <% end %>
-            <h5 class="mb-0">
-              <%= link_to task.title, todo_list_task_path(@todo_list, task), class: "text-decoration-none text-dark" %>
-            </h5>
-          </div>
-          <div>
-            <span class="badge bg-<%= task.completed ? 'success' : 'warning' %>">
-              <%= task.completed ? '✅ Completed' : '⏳ Pending' %>
-            </span>
-            <%= button_to 'Delete', todo_list_task_path(@todo_list, task), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
-          </div>
-        </li>
-      <% end %>
+          <% else %>
+            <span class="badge bg-secondary">No Edit Permission</span>
+          <% end %>
+          <h5 class="mb-0">
+            <%= link_to task.title, todo_list_task_path(@todo_list, task), class: "text-decoration-none text-dark" %>
+          </h5>
+        </div>
+        <div>
+          <span class="badge bg-<%= task.completed ? 'success' : 'warning' %>">
+            <%= task.completed ? '✅ Completed' : '⏳ Pending' %>
+          </span>
+          <%= button_to 'Delete', todo_list_task_path(@todo_list, task), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
+        </div>
+      </li>
+    <% end %>
+    
     </ul>
   <% else %>
     <p class="text-muted">No tasks added yet. Start by creating one!</p>
   <% end %>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Shared Users Card -->
+    <div class="col-lg-8 mx-auto">
+      <div class="card shadow-sm p-4 w-100">
+        <h2 class="card-title">Shared Users</h2>
+
+        <% if @todo_list.shared_lists.any? %>
+          <div class="mt-3">
+            <h5 class="text-secondary">Shared with:</h5>
+            <ul class="list-group">
+              <% @todo_list.shared_lists.each do |shared_list| %>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>
+                    <strong><%= shared_list.user.email %></strong>
+                  </span>
+                  <% if shared_list.user == current_user %>
+                    <span class="badge bg-info">You</span>
+                  <% end %>
+
+                  <!-- Permission Level -->
+                  <%= form_with model: shared_list, url: todo_list_shared_list_path(@todo_list, shared_list), method: :patch, local: true do |f| %>
+                    <%= f.label :permission_level, "Permission Level" %>
+                    <%= f.select :permission_level, [['Read-Only', false], ['Read-Write', true]], {}, class: 'form-select' %>
+                    <%= f.submit "Update", class: 'btn btn-sm btn-success ms-2' %>
+                  <% end %>
+
+                  <%= button_to "❌", todo_list_shared_list_path(@todo_list, shared_list), 
+                        method: :delete, class: "btn btn-sm btn-outline-danger",
+                        data: { confirm: "Are you sure you want to remove this user?" } %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% else %>
+          <p class="text-muted mt-3">This list is private.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <div class="row">
+    <!-- Share This List Card -->
+    <div class="col-lg-8 mx-auto mt-4">
+      <div class="card shadow-sm p-4 w-100">
+        <h3 class="card-title">Share This List</h3>
+        <%= form_with model: [@todo_list, SharedList.new], url: todo_list_shared_lists_path(@todo_list), method: :post do |f| %>
+          <div class="mb-3">
+            <%= f.label :email, "User Email", class: "form-label" %>
+            <%= f.text_field :email, class: "form-control", placeholder: "Enter user email" %>
+          </div>
+          <div class="mb-3">
+            <%= f.label :permission_level, "Permission Level", class: "form-label" %>
+            <%= f.select :permission_level, [['Read Only', false], ['Read/Write', true]], {}, class: "form-select" %>
+
+          </div>
+          <%= f.submit "Share", class: "btn btn-primary w-100" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,14 +1,18 @@
 class TodoListsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_todo_list, only: %i[show edit update destroy]
+  before_action :authorize_user, only: [:edit, :update, :destroy]
 
   def index
-    @todo_lists = current_user.todo_lists
+    @todo_lists = TodoList
+                   .where('todo_lists.user_id = ? OR EXISTS (SELECT 1 FROM shared_lists WHERE shared_lists.todo_list_id = todo_lists.id AND shared_lists.user_id = ?)', current_user.id, current_user.id)
   end
 
   def show
-    @todo_list = current_user.todo_lists.find(params[:id])
-    @comment = @todo_list.comments.build 
+    # If no to-do list is found, the user will be redirected
+    unless @todo_list
+      redirect_to todo_lists_path, alert: "You do not have permission to view this to-do list or the list does not exist."
+    end
   end
 
   def new
@@ -43,9 +47,25 @@ class TodoListsController < ApplicationController
 
   private
 
-  def set_todo_list
-    @todo_list = current_user.todo_lists.find(params[:id])
+  def authorize_user
+    unless @todo_list.user == current_user || @todo_list.shared_lists.exists?(user: current_user, permission_level: :read_write)
+      redirect_to todo_lists_path, alert: "You do not have permission to edit this list"
+    end
   end
+
+  def set_todo_list
+    # First try to find the todo list by the id and the user id
+    @todo_list = current_user.todo_lists.find_by(id: params[:id])
+    
+    # If the list isn't found for the current user, check if the list is shared with them
+    @todo_list ||= current_user.shared_lists.find_by(todo_list_id: params[:id])&.todo_list
+  
+    # If no todo list is found, raise RecordNotFound
+    unless @todo_list
+      redirect_to todo_lists_path, alert: "You do not have permission to view this to-do list or the list does not exist."
+    end
+  end
+  
 
   def todo_list_params
     params.require(:todo_list).permit(:title)
