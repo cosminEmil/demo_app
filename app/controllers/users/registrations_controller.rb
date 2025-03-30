@@ -9,9 +9,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
+    build_resource(sign_up_params)
+  
+    unless verify_recaptcha(model: resource)
+      Rails.logger.debug "reCAPTCHA FAILED! Setting flash.now[:alert]"
+      flash.now[:alert] = "reCAPTCHA verification failed. Please try again."
+      render :new and return
+    end
+  
+    Rails.logger.debug "reCAPTCHA PASSED"
     super
   end
-
+  
+  
   # GET /resource/edit
   def edit
     super

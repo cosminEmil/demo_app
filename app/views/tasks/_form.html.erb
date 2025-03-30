@@ -1,7 +1,7 @@
-<% if @todo_list.errors.any? %> 
-  <div class="alert alert-danger">
-    <ul>
-      <% @todo_list.errors.full_messages.each do |message| %>
+<% if @task.errors.any? %>
+  <div class="alert alert-danger" style="width: 100%; max-width: 600px; margin: 0 auto;">
+    <ul class="mb-0">
+      <% @task.errors.full_messages.each do |message| %>
         <li><%= message %></li>
       <% end %>
     </ul>
