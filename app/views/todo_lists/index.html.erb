@@ -1,25 +1,102 @@
-<div class="container mt-4 text-center">
-  <h1 class="mb-3">Your To-Do Lists</h1>
-  <%= link_to 'Create a New To-Do List', new_todo_list_path, class: 'btn btn-primary mb-4' %>
+<div class="container mt-4">
+  <div class="text-center mb-5">
+    <h1 class="display-5 fw-bold text-primary mb-3">
+      <i class="bi bi-journal-check me-2"></i>Your To-Do Lists
+    </h1>
+    <%= link_to '<i class="bi bi-plus-circle"></i> Create New List'.html_safe, 
+          new_todo_list_path, 
+          class: 'btn btn-primary btn-lg px-4' %>
+  </div>
 
   <% if @todo_lists.any? %>
-    <ul class="list-group mx-auto" style="max-width: 600px;">
-      <% @todo_lists.each do |todo_list| %>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center" style="gap: 23rem;">
-            <h5 class="mb-0">
-              <%= link_to todo_list.title, todo_list_path(todo_list), class: "text-decoration-none text-dark" %>
-            </h5>
-            <% if todo_list.user == current_user %>
-              <span class="badge bg-success">Owner</span>
-            <% else %>
-              <span class="badge bg-info">Shared with You</span>
-            <% end %>
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-header bg-light">
+            <h2 class="h5 mb-0">My Lists</h2>
           </div>
-        </li>
-      <% end %>
-    </ul>
+          
+          <ul class="list-group list-group-flush">
+            <% @todo_lists.each do |todo_list| %>
+              <li class="list-group-item py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-list-check text-primary fs-4 me-3"></i>
+                    <div>
+                      <h5 class="mb-0">
+                        <%= link_to todo_list.title, todo_list_path(todo_list), 
+                              class: "text-decoration-none text-dark fw-bold" %>
+                      </h5>
+                      <small class="text-muted">
+                        Created: <%= todo_list.created_at.strftime("%b %d, %Y") %>
+                        <% if todo_list.tasks.any? %>
+                          • <%= pluralize(todo_list.tasks.count, 'task') %>
+                        <% end %>
+                      </small>
+                    </div>
+                  </div>
+                  
+                  <div class="d-flex align-items-center">
+                    <% if todo_list.user == current_user %>
+                      <span class="badge bg-success me-2">
+                        <i class="bi bi-person-check me-1"></i>Owner
+                      </span>
+                    <% else %>
+                      <span class="badge bg-info me-2">
+                        <i class="bi bi-people me-1"></i>Shared
+                      </span>
+                    <% end %>
+                    
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                              type="button" 
+                              data-bs-toggle="dropdown" 
+                              aria-expanded="false">
+                        <i class="bi bi-three-dots"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                          <%= link_to '<i class="bi bi-pencil-square me-2"></i>Edit'.html_safe, 
+                                edit_todo_list_path(todo_list), 
+                                class: "dropdown-item" %>
+                        </li>
+                        <% if todo_list.user == current_user %>
+                          <li>
+                            <%= link_to '<i class="bi bi-share me-2"></i>Share'.html_safe, 
+                                  todo_list_path(todo_list), 
+                                  class: "dropdown-item" %>
+                          </li>
+                        <% end %>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <%= link_to '<i class="bi bi-trash me-2 text-danger"></i>Delete'.html_safe, 
+                                todo_list_path(todo_list), 
+                                method: :delete, 
+                                data: { confirm: 'Are you sure?' }, 
+                                class: "dropdown-item text-danger" %>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
   <% else %>
-    <p class="text-muted mt-3">You don’t have any to-do lists yet.</p>
+    <div class="text-center py-5">
+      <div class="card shadow-sm p-5 mx-auto" style="max-width: 600px;">
+        <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+        <h3 class="h4 text-muted mt-3">No To-Do Lists Found</h3>
+        <p class="text-muted">Get started by creating your first to-do list</p>
+        <%= link_to 'Create Your First List', new_todo_list_path, 
+              class: 'btn btn-primary mt-3 px-4' %>
+      </div>
+    </div>
   <% end %>
 </div>
+
+<!-- Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">

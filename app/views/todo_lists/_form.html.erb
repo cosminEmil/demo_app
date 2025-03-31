@@ -1,24 +1,77 @@
-<% if @todo_list.errors.any? %> 
-  <div class="alert alert-danger mx-auto w-25 mb-4">
-    <ul class="mb-0">
-      <% @todo_list.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
+<% if @todo_list.errors.any? %>
+  <div class="row justify-content-center mb-4">
+    <div class="col-lg-6 col-md-8 col-sm-10">
+      <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <h5 class="alert-heading d-flex align-items-center">
+          <i class="bi bi-exclamation-octagon-fill me-2"></i>
+          <%= pluralize(@todo_list.errors.count, "error") %> prevented this list from being saved:
+        </h5>
+        <ul class="mb-0 ps-3">
+          <% @todo_list.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    </div>
   </div>
 <% end %>
 
-<div class="d-flex justify-content-center mb-5 mt-5">
-  <div class="w-25 p-4 border rounded shadow-sm"> 
-    <%= form_with(model: @todo_list, local: true) do |form| %>
-      <div class="mb-2">
-        <%= form.label :title, class: 'form-label fw-semibold' %>
-        <%= form.text_field :title, class: 'form-control' %>
+<div class="row justify-content-center">
+  <div class="col-lg-6 col-md-8 col-sm-10">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-light py-3">
+        <h3 class="h5 mb-0 text-center">
+          <i class="bi bi-journal-text me-2"></i>
+          <%= @todo_list.new_record? ? "Create New Todo List" : "Edit Todo List" %>
+        </h3>
       </div>
+      
+      <div class="card-body">
+        <%= form_with(model: @todo_list, local: true) do |form| %>
+          <div class="mb-4">
+            <%= form.label :title, class: 'form-label fw-bold' %>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-card-heading"></i>
+              </span>
+              <%= form.text_field :title, class: 'form-control', placeholder: 'Enter list title' %>
+            </div>
+          </div>
 
-      <div class="d-flex justify-content-end mt-3">
-        <%= form.submit 'Save Todo List', class: 'btn btn-success px-4' %>
+          <% unless @todo_list.new_record? %>
+            <div class="mb-4">
+              <%= form.label :description, class: 'form-label fw-bold' %>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-text-paragraph"></i>
+                </span>
+                <%= form.text_area :description, class: 'form-control', rows: 3, placeholder: 'Optional list description' %>
+              </div>
+            </div>
+
+            <div class="mb-4 form-check form-switch">
+              <%= form.check_box :is_public, class: 'form-check-input', role: "switch" %>
+              <%= form.label :is_public, 'Make this list public', class: 'form-check-label' %>
+              <small class="text-muted d-block">Public lists can be seen by all users</small>
+            </div>
+          <% end %>
+
+          <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <%= link_to '<i class="bi bi-arrow-left me-1"></i> Cancel'.html_safe, 
+                  @todo_list.new_record? ? todo_lists_path : todo_list_path(@todo_list), 
+                  class: 'btn btn-outline-secondary' %>
+            
+            <%= form.button type: 'submit', class: 'btn btn-primary px-4' do %>
+              <i class="bi bi-check-circle me-1"></i>
+              <%= @todo_list.new_record? ? "Create List" : "Update List" %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>
+
+<!-- Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">

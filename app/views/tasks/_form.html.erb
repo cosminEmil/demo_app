@@ -1,34 +1,104 @@
 <% if @task.errors.any? %>
-  <div class="alert alert-danger" style="width: 100%; max-width: 600px; margin: 0 auto;">
-    <ul class="mb-0">
-      <% @task.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>
-
-<%= form_with(model: [@todo_list, @task], local: true) do |form| %>
-  <div class="card p-3 shadow-sm" style="max-width: 600px; margin: 0 auto;">
-    <h3 class="mb-3 text-center"><%= @task.new_record? ? "Create New Task" : "Edit Task" %></h3>
-
-    <div class="mb-3">
-      <%= form.label :title, class: 'form-label' %>
-      <%= form.text_field :title, class: 'form-control form-control-sm', placeholder: 'Enter task title' %>
-    </div>
-
-    <div class="mb-3">
-      <%= form.label :description, class: 'form-label' %>
-      <%= form.text_area :description, class: 'form-control form-control-sm', rows: 3, placeholder: 'Enter task description' %>
-    </div>
-
-    <div class="mb-3 form-check">
-      <%= form.check_box :completed, class: 'form-check-input' %>
-      <%= form.label :completed, 'Completed', class: 'form-check-label' %>
-    </div>
-
-    <div class="d-flex justify-content-end">
-      <%= form.submit @task.new_record? ? "Create Task" : "Update Task", class: 'btn btn-success btn-sm' %>
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <h5 class="alert-heading">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <%= pluralize(@task.errors.count, "error") %> prevented this task from being saved:
+        </h5>
+        <ul class="mb-0">
+          <% @task.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
     </div>
   </div>
 <% end %>
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <%= form_with(model: [@todo_list, @task], local: true) do |form| %>
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-light">
+          <h3 class="h5 mb-0 text-center">
+            <i class="bi bi-card-checklist me-2"></i>
+            <%= @task.new_record? ? "Create New Task" : "Edit Task" %>
+          </h3>
+        </div>
+        
+        <div class="card-body">
+          <div class="mb-3">
+            <%= form.label :title, class: 'form-label fw-bold' %>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-card-heading"></i>
+              </span>
+              <%= form.text_field :title, class: 'form-control', placeholder: 'Enter task title' %>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <%= form.label :description, class: 'form-label fw-bold' %>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-text-paragraph"></i>
+              </span>
+              <%= form.text_area :description, class: 'form-control', rows: 4, placeholder: 'Enter detailed description...' %>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check form-switch">
+              <%= form.check_box :completed, class: 'form-check-input', role: "switch" %>
+              <%= form.label :completed, 'Mark as completed', class: 'form-check-label' %>
+            </div>
+          </div>
+
+          <% unless @task.new_record? %>
+            <div class="mb-3">
+              <%= form.label :due_date, class: 'form-label fw-bold' %>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-calendar-event"></i>
+                </span>
+                <%= form.date_field :due_date, class: 'form-control' %>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <%= form.label :priority, class: 'form-label fw-bold' %>
+              <%= form.select :priority, 
+                    options_for_select([['Low', 'low'], ['Medium', 'medium'], ['High', 'high']], 
+                    @task.priority), 
+                    {}, class: 'form-select' %>
+            </div>
+          <% end %>
+
+          <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+            <%= link_to '<i class="bi bi-arrow-left me-1"></i> Back'.html_safe, 
+                  todo_list_path(@todo_list), 
+                  class: 'btn btn-outline-secondary' %>
+            
+            <div>
+              <%= link_to '<i class="bi bi-trash me-1"></i> Delete'.html_safe, 
+                    [@todo_list, @task], 
+                    method: :delete, 
+                    data: { confirm: 'Are you sure?' }, 
+                    class: 'btn btn-outline-danger me-2' unless @task.new_record? %>
+              
+              <%= form.button type: 'submit', class: 'btn btn-primary' do %>
+                <i class="bi bi-check-circle me-1"></i>
+                <%= @task.new_record? ? "Create Task" : "Update Task" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
