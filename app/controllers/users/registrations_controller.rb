@@ -9,18 +9,26 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
+    # Build the resource object from the form params
     build_resource(sign_up_params)
-  
-    unless verify_recaptcha(model: resource)
-      Rails.logger.debug "reCAPTCHA FAILED! Setting flash.now[:alert]"
-      flash.now[:alert] = "reCAPTCHA verification failed. Please try again."
-      render :new and return
+    
+    # First validate the basic fields (email/password)
+    unless resource.valid?
+      render :new, status: :unprocessable_entity and return
     end
-  
-    Rails.logger.debug "reCAPTCHA PASSED"
-    super
+    
+    # Then verify reCAPTCHA only if basic validations pass
+    unless verify_recaptcha(model: resource)
+      # Clear any previous errors to avoid duplication
+      resource.errors.clear
+      resource.errors.add(:base, "reCAPTCHA verification failed. Please try again.")
+      render :new, status: :unprocessable_entity and return
+    end
+    
+    resource.save
+    sign_up(resource_name, resource)
+    redirect_to after_sign_up_path_for(resource), notice: "Welcome! You've signed up successfully."
   end
-  
   
   # GET /resource/edit
   def edit
